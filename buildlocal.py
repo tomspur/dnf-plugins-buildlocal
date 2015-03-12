@@ -33,6 +33,7 @@ import shutil
 import copy
 import glob
 import subprocess
+import sys
 
 
 class BuildLocal(dnf.Plugin):
@@ -93,7 +94,10 @@ class BuildLocalCommand(dnf.cli.Command):
         locations = self._download_source(self.opts.packages)
         pkgs = copy.deepcopy(self.opts.packages)
         for loc in locations:
-            subprocess.call(["mock", loc])
+            ret = subprocess.call(["mock", loc])
+            if ret != 0:
+                print("Building failed. Aborting...")
+                sys.exit(1)
             # Install possible packages before continuing
             g = glob.glob("/var/lib/mock/fedora-*/result/*[0-9]*.rpm")
             print("FILES IN GLOB", g)
